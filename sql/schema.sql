@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS customers (
 CREATE TABLE IF NOT EXISTS tickets (
   id SERIAL PRIMARY KEY,
   number TEXT UNIQUE NOT NULL,
-  tier TEXT NOT NULL CHECK (tier IN ('pair','single')),
+  tier TEXT NOT NULL CHECK (tier IN ('single','pair','triple')),
   status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','sold')),
   sold_by INTEGER REFERENCES users(id),
   sold_to INTEGER REFERENCES customers(id),

@@ -78,6 +78,7 @@ export default function DashboardPage() {
         <button className={'tab' + (tab === 'tickets' ? ' active' : '')} onClick={() => setTab('tickets')}>Tickets</button>
         <button className={'tab' + (tab === 'sold' ? ' active' : '')} onClick={() => setTab('sold')}>Sold</button>
         <button className={'tab' + (tab === 'customers' ? ' active' : '')} onClick={() => setTab('customers')}>Customers</button>
+        {isAdmin && <button className={'tab' + (tab === 'addtickets' ? ' active' : '')} onClick={() => setTab('addtickets')}>Add Tickets</button>}
         {isAdmin && <button className={'tab' + (tab === 'users' ? ' active' : '')} onClick={() => setTab('users')}>Users</button>}
         <button className={'tab' + (tab === 'account' ? ' active' : '')} onClick={() => setTab('account')}>Account</button>
       </div>
@@ -105,36 +106,38 @@ export default function DashboardPage() {
         <UsersTab users={users} onChanged={refreshUsers} />
       )}
 
+      {tab === 'addtickets' && isAdmin && (
+        <AddTicketsTab onAdded={refreshTickets} />
+      )}
+
       {tab === 'account' && <AccountTab />}
     </div>
   );
 }
 
 function TicketsTab({ available, selected, toggleTicket, customers, customerId, setCustomerId, markSold, msg }) {
+  const triple = available.filter((t) => t.tier === 'triple');
   const pair = available.filter((t) => t.tier === 'pair');
   const single = available.filter((t) => t.tier === 'single');
+  const tiers = [
+    { key: 'triple', label: 'Triple', dot: 'triple', list: triple },
+    { key: 'pair', label: 'Paired', dot: 'pair', list: pair },
+    { key: 'single', label: 'Single', dot: 'single', list: single }
+  ];
   return (
     <div>
-      <div className="section">
-        <div className="section-head"><div className="dot pair" /><div className="section-title">Paired ({pair.length})</div></div>
-        <div className="numbers">
-          {pair.map((t) => (
-            <div key={t.id} className={'num pair' + (selected.has(t.id) ? ' selected' : '')} onClick={() => toggleTicket(t.id)}>
-              {t.number}
-            </div>
-          ))}
+      {tiers.map((tr) => (
+        <div className="section" key={tr.key}>
+          <div className="section-head"><div className={'dot ' + tr.dot} /><div className="section-title">{tr.label} ({tr.list.length})</div></div>
+          <div className="numbers">
+            {tr.list.map((t) => (
+              <div key={t.id} className={'num ' + tr.key + (selected.has(t.id) ? ' selected' : '')} onClick={() => toggleTicket(t.id)}>
+                {t.number}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="section">
-        <div className="section-head"><div className="dot single" /><div className="section-title">Single ({single.length})</div></div>
-        <div className="numbers">
-          {single.map((t) => (
-            <div key={t.id} className={'num' + (selected.has(t.id) ? ' selected' : '')} onClick={() => toggleTicket(t.id)}>
-              {t.number}
-            </div>
-          ))}
-        </div>
-      </div>
+      ))}
 
       {selected.size > 0 && (
         <div style={{ marginTop: 20 }}>
@@ -300,6 +303,102 @@ function UsersTab({ users, onChanged }) {
           <span className="meta">{u.role}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function AddTicketsTab({ onAdded }) {
+  const [imagePreview, setImagePreview] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [rawText, setRawText] = useState('');
+  const [tier, setTier] = useState('single');
+  const [msg, setMsg] = useState('');
+  const [result, setResult] = useState(null);
+
+  async function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImagePreview(URL.createObjectURL(file));
+    setScanning(true);
+    setMsg('');
+    setResult(null);
+    try {
+      const Tesseract = await import('tesseract.js');
+      const { data } = await Tesseract.recognize(file, 'eng', {
+        tessedit_char_whitelist: '0123456789'
+      });
+      // Pull out anything that looks like a run of digits; admin will clean up below
+      const found = (data.text.match(/\d+/g) || []).join('\n');
+      setRawText(found);
+    } catch (err) {
+      setMsg('Scan failed — you can still type numbers in manually below.');
+    } finally {
+      setScanning(false);
+    }
+  }
+
+  function parseNumbers() {
+    // Split on any non-digit, keep runs that are exactly 6 digits
+    return [...new Set((rawText.match(/\d{6}/g) || []))];
+  }
+
+  async function submit() {
+    const numbers = parseNumbers();
+    if (numbers.length === 0) {
+      setMsg('No valid 6-digit numbers found in the text box.');
+      return;
+    }
+    setMsg('');
+    try {
+      const res = await api.addTickets(numbers, tier);
+      setResult(res);
+      setMsg(`Added ${res.added} ticket(s)${res.skipped ? `, skipped ${res.skipped} duplicate(s)` : ''}.`);
+      setRawText('');
+      setImagePreview(null);
+      onAdded();
+    } catch (err) {
+      setMsg(err.message);
+    }
+  }
+
+  return (
+    <div>
+      <div className="field-row">
+        <label>Photo of tickets</label>
+        <input type="file" accept="image/*" capture="environment" onChange={handleFile} />
+      </div>
+
+      {imagePreview && (
+        <img src={imagePreview} alt="preview" style={{ width: '100%', borderRadius: 10, marginBottom: 12 }} />
+      )}
+
+      {scanning && <div style={{ fontSize: 13, color: '#8a8f98', marginBottom: 12 }}>Scanning photo…</div>}
+
+      <div className="field-row">
+        <label>Tier for this batch</label>
+        <select value={tier} onChange={(e) => setTier(e.target.value)}>
+          <option value="single">Single — 6,000,000 THB</option>
+          <option value="pair">Pair — 12,000,000 THB</option>
+          <option value="triple">Triple — 18,000,000 THB</option>
+        </select>
+      </div>
+
+      <div className="field-row">
+        <label>Detected numbers — review and fix before adding (one per line, 6 digits each)</label>
+        <textarea
+          value={rawText}
+          onChange={(e) => setRawText(e.target.value)}
+          rows={8}
+          style={{ padding: 10, borderRadius: 8, border: '1px solid #e2e2e0', fontFamily: 'monospace', fontSize: 14 }}
+        />
+      </div>
+
+      <div style={{ fontSize: 12, color: '#8a8f98', marginBottom: 12 }}>
+        OCR on this ticket font isn't perfect — double-check every number against the photo before adding.
+      </div>
+
+      <button className="btn" onClick={submit}>Add {parseNumbers().length} ticket(s)</button>
+      {msg && <div style={{ marginTop: 10, fontSize: 13 }}>{msg}</div>}
     </div>
   );
 }

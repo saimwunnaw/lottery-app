@@ -22,6 +22,7 @@ h1 { font-size: 24px; margin: 0 0 6px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .dot.pair { background: #16a34a; }
 .dot.single { background: #94a3b8; }
+.dot.triple { background: #b45309; }
 .section-title { font-size: 18px; font-weight: 600; }
 .section-sub { font-size: 14px; color: #8a8f98; margin: 2px 0 16px 20px; }
 
@@ -40,8 +41,10 @@ h1 { font-size: 24px; margin: 0 0 6px; }
   transition: transform 0.08s ease;
 }
 .num.pair { background: #f0faf3; color: #15803d; }
+.num.triple { background: #fffbeb; color: #b45309; }
 .num.selected { border-color: #1f2430; transform: scale(0.96); }
 .num.pair.selected { border-color: #15803d; background: #dcf5e3; }
+.num.triple.selected { border-color: #b45309; background: #fdedc9; }
 .num.selected::after { content: "✓"; margin-left: 6px; font-size: 12px; }
 .num.sold { opacity: 0.35; text-decoration: line-through; cursor: default; }
 
@@ -94,6 +97,7 @@ footer { margin-top: 8px; font-size: 11.5px; color: #b0b4bb; text-align: center;
   padding: 8px 8px 8px 14px; font-family: "SF Mono", "Menlo", monospace; font-size: 14px; letter-spacing: 1px;
 }
 .chip.pair { background: #f0faf3; color: #15803d; }
+.chip.triple { background: #fffbeb; color: #b45309; }
 .chip button {
   border: none; background: rgba(0,0,0,0.08); color: inherit; width: 20px; height: 20px;
   border-radius: 50%; font-size: 13px; line-height: 1; cursor: pointer;
@@ -119,6 +123,7 @@ footer { margin-top: 8px; font-size: 11.5px; color: #b0b4bb; text-align: center;
   padding: 11px 4px; border-radius: 8px; background: #f6f6f4;
 }
 #exportCard .exp-num.pair { background: #f0faf3; color: #15803d; }
+#exportCard .exp-num.triple { background: #fffbeb; color: #b45309; }
 
 /* Auth / dashboard */
 .auth-form { display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 40px auto; }

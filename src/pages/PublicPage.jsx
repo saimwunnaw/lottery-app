@@ -6,7 +6,7 @@ import { api } from '../api.js';
 export default function PublicPage() {
   const [lang, setLang] = useState('en');
   const [tickets, setTickets] = useState([]);
-  const [selected, setSelected] = useState(new Map());
+  const [selected, setSelected] = useState(new Map()); // number -> tier
   const [overlayOpen, setOverlayOpen] = useState(false);
   const exportRef = useRef(null);
   const t = translations[lang];
@@ -15,14 +15,15 @@ export default function PublicPage() {
     api.getTickets().then(setTickets).catch(() => {});
   }, []);
 
+  const tripleTickets = tickets.filter((tk) => tk.tier === 'triple');
   const pairTickets = tickets.filter((tk) => tk.tier === 'pair');
   const singleTickets = tickets.filter((tk) => tk.tier === 'single');
 
-  function toggle(num, isPair) {
+  function toggle(num, tier) {
     setSelected((prev) => {
       const next = new Map(prev);
       if (next.has(num)) next.delete(num);
-      else next.set(num, isPair);
+      else next.set(num, tier);
       return next;
     });
   }
@@ -67,6 +68,29 @@ export default function PublicPage() {
     });
   }
 
+  function Section({ tier, dotClass, title, sub, list }) {
+    return (
+      <div className="section">
+        <div className="section-head">
+          <div className={'dot ' + dotClass} />
+          <div className="section-title">{title}</div>
+        </div>
+        <div className="section-sub">{sub}</div>
+        <div className="numbers">
+          {list.map((tk) => (
+            <div
+              key={tk.id}
+              className={'num ' + tier + (selected.has(tk.number) ? ' selected' : '')}
+              onClick={() => toggle(tk.number, tier)}
+            >
+              {tk.number}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sheet">
       <div className="lang-bar">
@@ -85,43 +109,9 @@ export default function PublicPage() {
         <span>{t.drawLabel}</span> <span>{t.drawDate}</span>
       </div>
 
-      <div className="section">
-        <div className="section-head">
-          <div className="dot pair" />
-          <div className="section-title">{t.pairTitle}</div>
-        </div>
-        <div className="section-sub">{t.pairSub}</div>
-        <div className="numbers">
-          {pairTickets.map((tk) => (
-            <div
-              key={tk.id}
-              className={'num pair' + (selected.has(tk.number) ? ' selected' : '')}
-              onClick={() => toggle(tk.number, true)}
-            >
-              {tk.number}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="section">
-        <div className="section-head">
-          <div className="dot single" />
-          <div className="section-title">{t.singleTitle}</div>
-        </div>
-        <div className="section-sub">{t.singleSub}</div>
-        <div className="numbers">
-          {singleTickets.map((tk) => (
-            <div
-              key={tk.id}
-              className={'num' + (selected.has(tk.number) ? ' selected' : '')}
-              onClick={() => toggle(tk.number, false)}
-            >
-              {tk.number}
-            </div>
-          ))}
-        </div>
-      </div>
+      <Section tier="triple" dotClass="triple" title={t.tripleTitle} sub={t.tripleSub} list={tripleTickets} />
+      <Section tier="pair" dotClass="pair" title={t.pairTitle} sub={t.pairSub} list={pairTickets} />
+      <Section tier="single" dotClass="single" title={t.singleTitle} sub={t.singleSub} list={singleTickets} />
 
       <footer>Powered By Intercontinental Passage</footer>
 
@@ -139,8 +129,8 @@ export default function PublicPage() {
             <div className="overlay-title">{t.overlayTitle}</div>
             <div className="overlay-list">
               {selected.size === 0 && <div className="overlay-empty">{t.emptyMsg}</div>}
-              {[...selected.entries()].map(([num, isPair]) => (
-                <div key={num} className={'chip' + (isPair ? ' pair' : '')}>
+              {[...selected.entries()].map(([num, tier]) => (
+                <div key={num} className={'chip ' + tier}>
                   <span>{num}</span>
                   <button onClick={() => deselect(num)}>×</button>
                 </div>
@@ -161,8 +151,8 @@ export default function PublicPage() {
           {t.drawLabel} {t.drawDate}
         </div>
         <div className="exp-grid">
-          {[...selected.entries()].map(([num, isPair]) => (
-            <div key={num} className={'exp-num' + (isPair ? ' pair' : '')}>{num}</div>
+          {[...selected.entries()].map(([num, tier]) => (
+            <div key={num} className={'exp-num ' + tier}>{num}</div>
           ))}
         </div>
       </div>

@@ -39,5 +39,8 @@ export const api = {
     request('/admin/create-user', { method: 'POST', body: JSON.stringify({ username, password, role }) }),
 
   resetPassword: (targetUsername, newPassword) =>
-    request('/admin/reset-password', { method: 'POST', body: JSON.stringify({ targetUsername, newPassword }) })
+    request('/admin/reset-password', { method: 'POST', body: JSON.stringify({ targetUsername, newPassword }) }),
+
+  addTickets: (numbers, tier) =>
+    request('/admin/add-tickets', { method: 'POST', body: JSON.stringify({ numbers, tier }) })
 };

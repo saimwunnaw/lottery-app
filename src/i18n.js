@@ -2,6 +2,8 @@ export const translations = {
   en: {
     drawLabel: 'Draw date:',
     drawDate: '16 September 2026 (B.E. 2569)',
+    tripleTitle: 'Triple tickets',
+    tripleSub: 'First Prize - 18,000,000 THB',
     pairTitle: 'Paired tickets',
     pairSub: 'First Prize - 12,000,000 THB',
     singleTitle: 'Single tickets',
@@ -20,6 +22,8 @@ export const translations = {
   th: {
     drawLabel: 'งวดวันที่:',
     drawDate: '16 กันยายน 2569',
+    tripleTitle: 'สลากสามใบ',
+    tripleSub: 'รางวัลที่ 1 - 18,000,000 บาท',
     pairTitle: 'สลากคู่',
     pairSub: 'รางวัลที่ 1 - 12,000,000 บาท',
     singleTitle: 'สลากเดี่ยว',
@@ -38,6 +42,8 @@ export const translations = {
   mm: {
     drawLabel: 'ထီဖွင့်ရက်',
     drawDate: 'စက်တင်ဘာ ၁၆ ရက် ၂၀၂၆',
+    tripleTitle: '၃ စောင်တွဲ',
+    tripleSub: 'ပထမဆု - ဘတ် ၁၈,၀၀၀,၀၀၀',
     pairTitle: '၂ စောင်တွဲ',
     pairSub: 'ပထမဆု - ဘတ် ၁၂,၀၀၀,၀၀၀',
     singleTitle: 'တစ်စောင်တွဲ',

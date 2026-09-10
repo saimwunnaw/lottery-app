@@ -6,6 +6,6 @@ export default async function handler(req, res) {
   const admin = verifyToken(req);
   if (!admin || admin.role !== 'admin') return res.status(403).json({ error: 'Admins only' });
 
-  const { rows } = await sql`SELECT id, username, role, created_at FROM users ORDER BY created_at`;
+  const rows = await sql`SELECT id, username, role, created_at FROM users ORDER BY created_at`;
   res.status(200).json(rows);
 }

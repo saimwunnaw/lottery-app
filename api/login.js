@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Missing username or password' });
 
-  const { rows } = await sql`SELECT * FROM users WHERE username = ${username}`;
+  const rows = await sql`SELECT * FROM users WHERE username = ${username}`;
   const user = rows[0];
   if (!user) return res.status(401).json({ error: 'Invalid username or password' });
 

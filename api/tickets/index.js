@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     const auth = verifyToken(req);
     if (auth) {
       // Logged-in view: full detail, all statuses
-      const { rows } = await sql`
+      const rows = await sql`
         SELECT t.*, c.name AS customer_name
         FROM tickets t
         LEFT JOIN customers c ON c.id = t.sold_to
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       return res.status(200).json(rows);
     } else {
       // Public view: only available tickets, minimal fields
-      const { rows } = await sql`
+      const rows = await sql`
         SELECT id, number, tier FROM tickets
         WHERE status = 'available'
         ORDER BY tier, number

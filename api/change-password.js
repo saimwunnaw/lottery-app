@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   const { currentPassword, newPassword } = req.body || {};
   if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Missing fields' });
 
-  const { rows } = await sql`SELECT * FROM users WHERE id = ${auth.id}`;
+  const rows = await sql`SELECT * FROM users WHERE id = ${auth.id}`;
   const user = rows[0];
   const ok = await bcrypt.compare(currentPassword, user.password_hash);
   if (!ok) return res.status(400).json({ error: 'Current password is incorrect' });
